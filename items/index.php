@@ -2,21 +2,54 @@
 require_once __DIR__ . '/../auth/guard.php';
 require_once __DIR__ . '/../config/db.php';
 
-// --- Filters (GET) ---
+/**
+ * ===========================
+ * FILTERS (GET parameters)
+ * ===========================
+ * q        = search keyword
+ * category = category id
+ * low      = low-stock threshold (<= low)
+ * sort     = sorting option
+ */
 $q = trim($_GET["q"] ?? "");
 $category = (int)($_GET["category"] ?? 0);
-$low = (int)($_GET["low"] ?? 0); // low-stock threshold; 0 means off
+$low = (int)($_GET["low"] ?? 0);
+$sort = $_GET["sort"] ?? "date_desc";
 
-// --- Pagination ---
+// Whitelist sort values (prevents SQL injection in ORDER BY)
+$allowedSort = [
+  "date_desc", "date_asc",
+  "name_asc", "name_desc",
+  "qty_asc", "qty_desc"
+];
+if (!in_array($sort, $allowedSort, true)) $sort = "date_desc";
+
+/**
+ * ===========================
+ * PAGINATION
+ * ===========================
+ * page    = current page
+ * perPage = items per page
+ * offset  = SQL OFFSET
+ */
 $page = max(1, (int)($_GET["page"] ?? 1));
 $perPage = 10;
 $offset = ($page - 1) * $perPage;
 
-// --- Load categories for filter dropdown ---
+/**
+ * ===========================
+ * LOAD CATEGORIES (for dropdown)
+ * ===========================
+ */
 $catStmt = $pdo->query("SELECT id, name FROM categories ORDER BY name ASC");
 $categories = $catStmt->fetchAll(PDO::FETCH_ASSOC);
 
-// --- Build dynamic WHERE conditions ---
+/**
+ * ===========================
+ * BUILD WHERE CONDITIONS (dynamic)
+ * ===========================
+ * We build arrays then join them into a safe WHERE clause.
+ */
 $where = [];
 $params = [];
 
@@ -36,12 +69,29 @@ if ($low > 0) {
     $params[] = $low;
 }
 
-$whereSql = "";
-if (count($where) > 0) {
-    $whereSql = "WHERE " . implode(" AND ", $where);
+$whereSql = count($where) ? ("WHERE " . implode(" AND ", $where)) : "";
+
+/**
+ * ===========================
+ * SORTING (safe mapping)
+ * ===========================
+ * We never directly put user input into SQL.
+ */
+$orderBy = "i.created_at DESC";
+switch ($sort) {
+    case "date_asc":  $orderBy = "i.created_at ASC"; break;
+    case "name_asc":  $orderBy = "i.name ASC"; break;
+    case "name_desc": $orderBy = "i.name DESC"; break;
+    case "qty_asc":   $orderBy = "i.quantity ASC"; break;
+    case "qty_desc":  $orderBy = "i.quantity DESC"; break;
+    default:          $orderBy = "i.created_at DESC"; break;
 }
 
-// --- Total count for pagination ---
+/**
+ * ===========================
+ * COUNT for Pagination
+ * ===========================
+ */
 $countSql = "
     SELECT COUNT(*) AS total
     FROM items i
@@ -58,24 +108,77 @@ if ($page > $totalPages) {
     $offset = ($page - 1) * $perPage;
 }
 
-// --- Fetch items (with category name) ---
+/**
+ * ===========================
+ * DASHBOARD STATS (C)
+ * ===========================
+ * 1) total items (already: $total, respects filters)
+ * 2) total quantity (sum quantity, respects filters)
+ * 3) low-stock count (<= 3, respects q/category filters)
+ * 4) total categories (global)
+ */
+
+// Total quantity respecting current filters
+$sumSql = "SELECT COALESCE(SUM(i.quantity),0) AS total_qty FROM items i $whereSql";
+$sumStmt = $pdo->prepare($sumSql);
+$sumStmt->execute($params);
+$totalQty = (int)$sumStmt->fetch(PDO::FETCH_ASSOC)["total_qty"];
+
+// Low stock count (<= 3) respecting q + category (not affected by 'low' filter)
+$whereBase = [];
+$paramsBase = [];
+
+if ($q !== "") {
+    $whereBase[] = "(i.name LIKE ? OR i.description LIKE ?)";
+    $paramsBase[] = "%$q%";
+    $paramsBase[] = "%$q%";
+}
+if ($category > 0) {
+    $whereBase[] = "i.category_id = ?";
+    $paramsBase[] = $category;
+}
+
+$whereBaseSql = count($whereBase) ? ("WHERE " . implode(" AND ", $whereBase)) : "";
+$lowCountSql = "
+    SELECT COUNT(*) AS low_count
+    FROM items i
+    $whereBaseSql
+    " . (count($whereBase) ? "AND" : "WHERE") . " i.quantity <= 3
+";
+$lowStmt = $pdo->prepare($lowCountSql);
+$lowStmt->execute($paramsBase);
+$lowCount = (int)$lowStmt->fetch(PDO::FETCH_ASSOC)["low_count"];
+
+// Total categories (global)
+$catCount = (int)$pdo->query("SELECT COUNT(*) AS c FROM categories")->fetch(PDO::FETCH_ASSOC)["c"];
+
+/**
+ * ===========================
+ * FETCH ITEMS LIST
+ * ===========================
+ * Applies:
+ * - filters (WHERE)
+ * - sorting (ORDER BY)
+ * - pagination (LIMIT/OFFSET)
+ */
 $listSql = "
     SELECT i.id, i.name, i.description, i.quantity, i.created_at,
            c.name AS category_name
     FROM items i
     JOIN categories c ON i.category_id = c.id
     $whereSql
-    ORDER BY i.created_at DESC
+    ORDER BY $orderBy
     LIMIT $perPage OFFSET $offset
 ";
 $listStmt = $pdo->prepare($listSql);
 $listStmt->execute($params);
 $items = $listStmt->fetchAll(PDO::FETCH_ASSOC);
 
-// Helper for building query strings
+/**
+ * Helper: build URL query string preserving existing filters
+ */
 function buildQuery(array $overrides = []): string {
     $merged = array_merge($_GET, $overrides);
-    // remove empty values
     foreach ($merged as $k => $v) {
         if ($v === "" || $v === null) unset($merged[$k]);
     }
@@ -88,7 +191,7 @@ function buildQuery(array $overrides = []): string {
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Items Dashboard</title>
-    <link rel="stylesheet" href="/css/items-index.css" />
+  <link rel="stylesheet" href="/css/items-index.css" />
 </head>
 <body>
   <div class="container">
@@ -98,8 +201,9 @@ function buildQuery(array $overrides = []): string {
         <h1>Items Dashboard</h1>
         <p>Welcome, <strong><?= htmlspecialchars($_SESSION["user_name"] ?? "User") ?></strong></p>
 
-        <!-- Filters -->
+        <!-- Filters + Sorting -->
         <form class="filters" method="GET" action="/items/index.php">
+
           <div class="field">
             <label>Search</label>
             <input type="text" name="q" placeholder="Name or description..." value="<?= htmlspecialchars($q) ?>">
@@ -122,6 +226,19 @@ function buildQuery(array $overrides = []): string {
             <input type="number" name="low" min="0" placeholder="e.g. 3" value="<?= $low > 0 ? (int)$low : "" ?>">
           </div>
 
+          <!-- Sorting dropdown (B) -->
+          <div class="field">
+            <label>Sort</label>
+            <select name="sort">
+              <option value="date_desc" <?= $sort==="date_desc" ? "selected" : "" ?>>Date: Newest</option>
+              <option value="date_asc"  <?= $sort==="date_asc"  ? "selected" : "" ?>>Date: Oldest</option>
+              <option value="name_asc"  <?= $sort==="name_asc"  ? "selected" : "" ?>>Name: A → Z</option>
+              <option value="name_desc" <?= $sort==="name_desc" ? "selected" : "" ?>>Name: Z → A</option>
+              <option value="qty_asc"   <?= $sort==="qty_asc"   ? "selected" : "" ?>>Qty: Low → High</option>
+              <option value="qty_desc"  <?= $sort==="qty_desc"  ? "selected" : "" ?>>Qty: High → Low</option>
+            </select>
+          </div>
+
           <div class="field" style="justify-content:flex-end;">
             <label>&nbsp;</label>
             <button class="btn primary" type="submit">Apply</button>
@@ -139,6 +256,29 @@ function buildQuery(array $overrides = []): string {
         <a class="btn" href="/categories/index.php">Manage Categories</a>
         <a class="btn primary" href="/items/create.php">+ Add Item</a>
         <a class="btn" href="/auth/logout.php">Logout</a>
+      </div>
+    </div>
+
+    <!-- Stats Cards (C) -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="muted">Filtered Items</div>
+        <div class="stat-value"><?= (int)$total ?></div>
+      </div>
+
+      <div class="stat-card">
+        <div class="muted">Low Stock (≤ 3)</div>
+        <div class="stat-value"><?= (int)$lowCount ?></div>
+      </div>
+
+      <div class="stat-card">
+        <div class="muted">Total Quantity</div>
+        <div class="stat-value"><?= (int)$totalQty ?></div>
+      </div>
+
+      <div class="stat-card">
+        <div class="muted">Categories</div>
+        <div class="stat-value"><?= (int)$catCount ?></div>
       </div>
     </div>
 
