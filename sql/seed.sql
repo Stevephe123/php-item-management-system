@@ -13,4 +13,6 @@ INSERT INTO users (name, email, password) VALUES
 
 INSERT INTO items (name, description, category_id, quantity) VALUES
 ('Dell XPS 13', 'Office laptop', 1, 5),
-('Logitech MX Master', 'Wireless mouse', 3, 10);
+('Logitech MX Master', 'Wireless mouse', 3, 10),   
+('HP Pavilion Desktop', 'Home desktop computer', 2, 3),
+('Mechanical Keyboard', 'RGB backlit keyboard', 4, 7);
