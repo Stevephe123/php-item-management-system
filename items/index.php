@@ -51,8 +51,10 @@ $items = $stmt->fetchAll(PDO::FETCH_ASSOC);
       </div>
 
       <div class="actions">
+        <a class="btn" href="/categories/index.php">Manage Categories</a>
         <a class="btn primary" href="/items/create.php">+ Add Item</a>
         <a class="btn" href="/auth/logout.php">Logout</a>
+
       </div>
     </div>
 
