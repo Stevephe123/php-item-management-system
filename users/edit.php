@@ -58,19 +58,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Edit User</title>
-  <style>
-    body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial; margin:0; background:#f5f6f7;}
-    .container{max-width:780px; margin:0 auto; padding:24px;}
-    .topbar{display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:14px;}
-    .btn{display:inline-block; padding:9px 12px; border-radius:10px; text-decoration:none; font-size:14px; border:1px solid #ddd; background:#fff; color:#111;}
-    .btn.primary{background:#111; color:#fff; border-color:#111;}
-    .card{background:#fff; border-radius:14px; box-shadow:0 10px 30px rgba(0,0,0,.08); padding:18px;}
-    h1{margin:0; font-size:20px;}
-    label{display:block; font-size:13px; margin:12px 0 6px;}
-    input{width:100%; padding:10px 12px; border:1px solid #ddd; border-radius:10px; font-size:14px; outline:none; background:#fff;}
-    .err{margin-top:10px; color:#b00020; font-size:13px;}
-    .muted{color:#666; font-size:13px; margin-top:6px;}
-  </style>
+    <link rel="stylesheet" href="/css/users-edit.css" />
 </head>
 <body>
   <div class="container">

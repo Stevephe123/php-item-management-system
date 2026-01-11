@@ -47,20 +47,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Delete Item</title>
-  <style>
-    body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial; margin:0; background:#f5f6f7;}
-    .container{max-width:780px; margin:0 auto; padding:24px;}
-    .topbar{display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:14px;}
-    .btn{display:inline-block; padding:9px 12px; border-radius:10px; text-decoration:none; font-size:14px; border:1px solid #ddd; background:#fff; color:#111;}
-    .btn.danger{background:#b00020; color:#fff; border-color:#b00020;}
-    .card{background:#fff; border-radius:14px; box-shadow:0 10px 30px rgba(0,0,0,.08); padding:18px;}
-    h1{margin:0; font-size:20px;}
-    .muted{color:#666; font-size:13px; margin-top:6px;}
-    .box{margin-top:14px; padding:12px; background:#fafafa; border:1px solid #eee; border-radius:12px;}
-    .row{display:flex; gap:10px; margin-top:14px; flex-wrap:wrap;}
-    .err{margin-top:10px; color:#b00020; font-size:13px;}
-    .badge{display:inline-block; padding:3px 8px; border-radius:999px; background:#f0f0f0; font-size:12px;}
-  </style>
+    <link rel="stylesheet" href="/css/items-delete.css" />
 </head>
 <body>
   <div class="container">

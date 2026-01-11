@@ -37,19 +37,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Login</title>
-  <style>
-    body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial; margin:0; background:#f5f6f7;}
-    .wrap{min-height:100vh; display:flex; align-items:center; justify-content:center; padding:24px;}
-    .card{width:100%; max-width:420px; background:#fff; border-radius:14px; padding:22px; box-shadow:0 10px 30px rgba(0,0,0,.08);}
-    h1{margin:0 0 6px; font-size:20px;}
-    p{margin:0 0 14px; color:#555; font-size:14px;}
-    label{display:block; font-size:13px; margin:10px 0 6px;}
-    input{width:100%; padding:10px 12px; border:1px solid #ddd; border-radius:10px; font-size:14px; outline:none;}
-    input:focus{border-color:#bbb;}
-    .btn{margin-top:14px; width:100%; padding:10px 12px; border:0; border-radius:10px; background:#111; color:#fff; font-size:14px; cursor:pointer;}
-    .err{margin-top:10px; color:#b00020; font-size:13px;}
-    .hint{margin-top:10px; color:#666; font-size:12px;}
-  </style>
+    <link rel="stylesheet" href="/css/auth-login.css" />
 </head>
 <body>
   <div class="wrap">

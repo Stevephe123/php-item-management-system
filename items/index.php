@@ -88,36 +88,7 @@ function buildQuery(array $overrides = []): string {
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Items Dashboard</title>
-  <style>
-    body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial; margin:0; background:#f5f6f7;}
-    .container{max-width:1100px; margin:0 auto; padding:24px;}
-    .topbar{display:flex; align-items:flex-start; justify-content:space-between; gap:12px; margin-bottom:14px; flex-wrap:wrap;}
-    .title h1{margin:0; font-size:20px;}
-    .title p{margin:4px 0 0; color:#555; font-size:13px;}
-    .actions{display:flex; gap:10px; align-items:center; flex-wrap:wrap;}
-    .btn{display:inline-block; padding:9px 12px; border-radius:10px; text-decoration:none; font-size:14px; border:1px solid #ddd; background:#fff; color:#111;}
-    .btn.primary{background:#111; color:#fff; border-color:#111;}
-    .card{background:#fff; border-radius:14px; box-shadow:0 10px 30px rgba(0,0,0,.08); overflow:hidden;}
-    table{width:100%; border-collapse:collapse;}
-    th, td{padding:12px 12px; border-bottom:1px solid #eee; text-align:left; vertical-align:top;}
-    th{font-size:12px; color:#444; background:#fafafa; letter-spacing:.02em; text-transform:uppercase;}
-    td{font-size:14px;}
-    .muted{color:#666; font-size:13px;}
-    .row-actions{display:flex; gap:10px;}
-    .link{color:#111; text-decoration:none; border-bottom:1px dotted #999;}
-    .danger{color:#b00020;}
-    .empty{padding:18px; color:#555;}
-    .badge{display:inline-block; padding:3px 8px; border-radius:999px; background:#f0f0f0; font-size:12px;}
-    .badge.low{background:#ffe9ec; color:#b00020;}
-    .filters{margin-top:10px; display:flex; gap:10px; flex-wrap:wrap;}
-    .filters input,.filters select{padding:10px 12px; border:1px solid #ddd; border-radius:10px; font-size:14px; outline:none; background:#fff;}
-    .filters .field{display:flex; flex-direction:column; gap:6px;}
-    .filters label{font-size:12px; color:#444; text-transform:uppercase; letter-spacing:.02em;}
-    .pager{display:flex; align-items:center; justify-content:space-between; gap:12px; padding:12px 12px;}
-    .pager .info{font-size:13px; color:#555;}
-    .pager .nav{display:flex; gap:8px; flex-wrap:wrap;}
-    .table-wrap{overflow:auto;}
-  </style>
+    <link rel="stylesheet" href="/css/items-index.css" />
 </head>
 <body>
   <div class="container">
