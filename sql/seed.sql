@@ -9,7 +9,7 @@ INSERT INTO categories (name) VALUES
 -- admin@example.com / admin123
 INSERT INTO users (name, email, password) VALUES
 ('Admin', 'admin@example.com',
-'$2y$10$wH8m3sCq8P9V2NnD0Y1nBeF8kP9f1x7YzZy0HnQm8rYHkFqP8eZ2C');
+'$2y$10$4rmlUTOBuvoA93SXnjIklOjg.57LhqbFUrtf3qdyd6ITOJHVnVeQC');
 
 INSERT INTO items (name, description, category_id, quantity) VALUES
 ('Dell XPS 13', 'Office laptop', 1, 5),
